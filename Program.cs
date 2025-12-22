@@ -1,5 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using CukierniaAdamMus.Models;
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("CukierniaContext");
+builder.Services.AddDbContext<CukierniaContext>(options =>
+    options.UseSqlServer(connectionString));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
