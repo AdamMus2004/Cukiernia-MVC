@@ -1,6 +1,8 @@
-﻿namespace CukierniaAdamMus.Models
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+namespace CukierniaAdamMus.Models
 {
-    public class CukierniaContext : DbContext
+    public class CukierniaContext : IdentityDbContext
     {
         public CukierniaContext(DbContextOptions<CukierniaContext> options) : base(options)
         {
