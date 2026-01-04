@@ -16,6 +16,19 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Uruchamiamy nasz Seeder
+        await CukierniaAdamMus.Models.DbSeeder.Initialize(services);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("B³¹d podczas tworzenia Admina: " + ex.Message);
+    }
+}
 
 if (!app.Environment.IsDevelopment())
 {
