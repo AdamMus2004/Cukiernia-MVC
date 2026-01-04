@@ -21,7 +21,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        // Uruchamiamy nasz Seeder
+
         await CukierniaAdamMus.Models.DbSeeder.Initialize(services);
     }
     catch (Exception ex)
