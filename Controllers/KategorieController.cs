@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CukierniaAdamMus.Models;
+using Microsoft.AspNetCore.Authorization; // WAŻNE: Dodano do obsługi ról
 
 namespace CukierniaAdamMus.Controllers
 {
@@ -19,6 +20,7 @@ namespace CukierniaAdamMus.Controllers
         }
 
         // GET: Kategorie
+        // To widzi każdy (nawet niezalogowany), żeby mógł zobaczyć ofertę
         public async Task<IActionResult> Index()
         {
             return View(await _context.Kategorie.ToListAsync());
@@ -43,18 +45,23 @@ namespace CukierniaAdamMus.Controllers
         }
 
         // GET: Kategorie/Create
+        [Authorize(Roles = "Admin")] // TYLKO ADMIN
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Kategorie/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("KategoriaId,Nazwa")] Kategoria kategoria)
+        // [Authorize(Roles = "Admin")] // Odkomentuj jak już zadziała
+        public async Task<IActionResult> Create(Kategoria kategoria)
         {
+            // --- TO JEST TA POPRAWKA ---
+            // Mówimy systemowi: "Nie sprawdzaj listy produktów, wiem że jest pusta"
+            ModelState.Remove("Produkty");
+            // ---------------------------
+
             if (ModelState.IsValid)
             {
                 _context.Add(kategoria);
@@ -65,6 +72,7 @@ namespace CukierniaAdamMus.Controllers
         }
 
         // GET: Kategorie/Edit/5
+        [Authorize(Roles = "Admin")] // TYLKO ADMIN
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,11 +89,10 @@ namespace CukierniaAdamMus.Controllers
         }
 
         // POST: Kategorie/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("KategoriaId,Nazwa")] Kategoria kategoria)
+        [Authorize(Roles = "Admin")] // TYLKO ADMIN
+        public async Task<IActionResult> Edit(int id, Kategoria kategoria) // Usunięto [Bind]
         {
             if (id != kategoria.KategoriaId)
             {
@@ -116,6 +123,7 @@ namespace CukierniaAdamMus.Controllers
         }
 
         // GET: Kategorie/Delete/5
+        [Authorize(Roles = "Admin")] // TYLKO ADMIN
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,6 +144,7 @@ namespace CukierniaAdamMus.Controllers
         // POST: Kategorie/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")] // TYLKO ADMIN
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var kategoria = await _context.Kategorie.FindAsync(id);
