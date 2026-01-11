@@ -7,20 +7,25 @@ namespace CukierniaAdamMus.Models
     {
         [Key]
         public int ProduktId { get; set; }
+
         [Required(ErrorMessage = "Nazwa produktu jest wymagana.")]
-        [Display (Name = "Nazwa Produktu")]
+        [Display(Name = "Nazwa Produktu")]
         public string Nazwa { get; set; }
-        [Display (Name = "Opis Produktu")]
-        public string Opis { get; set; }
+
+        [Display(Name = "Opis Produktu")]
+        public string? Opis { get; set; }
 
         [Required(ErrorMessage = "Cena produktu jest wymagana.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Cena musi być większa od 0.")]
         [DataType(DataType.Currency)]
+        [Column(TypeName = "decimal(18, 2)")] 
         public decimal Cena { get; set; }
-        [Display (Name = "Kategoria")]
+
+        [Display(Name = "Kategoria")]
         public int KategoriaId { get; set; }
+
         [ForeignKey("KategoriaId")]
-        public virtual Kategoria Kategoria { get; set; }
-        public virtual ICollection<PozycjaZamowienia> PozycjaZamowienias { get; set; }
+        public virtual Kategoria? Kategoria { get; set; }
+        public virtual ICollection<PozycjaZamowienia>? PozycjaZamowienias { get; set; }
     }
 }

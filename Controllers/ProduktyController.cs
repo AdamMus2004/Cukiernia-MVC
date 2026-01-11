@@ -18,15 +18,15 @@ namespace CukierniaAdamMus.Controllers
             _context = context;
         }
 
-        // GET: Produkty
-        public async Task<IActionResult> Index()
+        // GET: Produkty
+        public async Task<IActionResult> Index()
         {
             var cukierniaContext = _context.Produkty.Include(p => p.Kategoria);
             return View(await cukierniaContext.ToListAsync());
         }
 
-        // GET: Produkty/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Produkty/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -34,8 +34,8 @@ namespace CukierniaAdamMus.Controllers
             }
 
             var produkt = await _context.Produkty
-                .Include(p => p.Kategoria)
-                .FirstOrDefaultAsync(m => m.ProduktId == id);
+              .Include(p => p.Kategoria)
+              .FirstOrDefaultAsync(m => m.ProduktId == id);
             if (produkt == null)
             {
                 return NotFound();
@@ -44,20 +44,22 @@ namespace CukierniaAdamMus.Controllers
             return View(produkt);
         }
 
-        // GET: Produkty/Create
-        public IActionResult Create()
+        // GET: Produkty/Create
+        public IActionResult Create()
         {
             ViewData["KategoriaId"] = new SelectList(_context.Kategorie, "KategoriaId", "Nazwa");
             return View();
         }
 
-        // POST: Produkty/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        // POST: Produkty/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProduktId,Nazwa,Opis,Cena,KategoriaId")] Produkt produkt)
         {
+            ModelState.Remove("Kategoria");
+            ModelState.Remove("PozycjeZamowienia");
             if (ModelState.IsValid)
             {
                 _context.Add(produkt);
@@ -68,8 +70,8 @@ namespace CukierniaAdamMus.Controllers
             return View(produkt);
         }
 
-        // GET: Produkty/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Produkty/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -85,10 +87,10 @@ namespace CukierniaAdamMus.Controllers
             return View(produkt);
         }
 
-        // POST: Produkty/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        // POST: Produkty/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProduktId,Nazwa,Opis,Cena,KategoriaId")] Produkt produkt)
         {
@@ -121,8 +123,8 @@ namespace CukierniaAdamMus.Controllers
             return View(produkt);
         }
 
-        // GET: Produkty/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Produkty/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -130,8 +132,8 @@ namespace CukierniaAdamMus.Controllers
             }
 
             var produkt = await _context.Produkty
-                .Include(p => p.Kategoria)
-                .FirstOrDefaultAsync(m => m.ProduktId == id);
+              .Include(p => p.Kategoria)
+              .FirstOrDefaultAsync(m => m.ProduktId == id);
             if (produkt == null)
             {
                 return NotFound();
@@ -140,8 +142,8 @@ namespace CukierniaAdamMus.Controllers
             return View(produkt);
         }
 
-        // POST: Produkty/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // POST: Produkty/Delete/5
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

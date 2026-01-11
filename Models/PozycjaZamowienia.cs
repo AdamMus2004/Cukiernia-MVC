@@ -13,7 +13,7 @@ namespace CukierniaAdamMus.Models
         public virtual Zamowienie Zamowienie { get; set; }
         public int ProduktId { get; set; }
         [ForeignKey("ProduktId")]
-        public virtual Produkt Produkt { get; set; }
+        public virtual Produkt? Produkt { get; set; }
         
     }
 }

@@ -16,7 +16,7 @@ namespace CukierniaAdamMus.Models
         [Display(Name = "Klient")]
         public int KlientId { get; set; }
         [ForeignKey("KlientId")]
-        public virtual Klient Klient { get; set; }
-        public virtual ICollection<PozycjaZamowienia> PozycjaZamowienias { get; set; }
+        public virtual Klient? Klient { get; set; }
+        public virtual ICollection<PozycjaZamowienia>? PozycjaZamowienias { get; set; }
     }
 }
