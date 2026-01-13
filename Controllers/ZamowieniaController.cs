@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CukierniaAdamMus.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CukierniaAdamMus.Controllers
 {
+    [Authorize]
     public class ZamowieniaController : Controller
     {
         private readonly CukierniaContext _context;
@@ -18,146 +15,61 @@ namespace CukierniaAdamMus.Controllers
             _context = context;
         }
 
-        // GET: Zamowienia
         public async Task<IActionResult> Index()
         {
-            var cukierniaContext = _context.Zamowienia.Include(z => z.Klient);
-            return View(await cukierniaContext.ToListAsync());
+            var userEmail = User.Identity.Name;
+            var query = _context.Zamowienia.Include(z => z.Klient);
+
+            if (User.IsInRole("Admin"))
+                return View(await query.ToListAsync());
+
+            return View(await query.Where(z => z.Klient.Email == userEmail).ToListAsync());
         }
 
-        // GET: Zamowienia/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Create(int? produktId)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (produktId == null) return RedirectToAction("Index", "Produkty");
 
-            var zamowienie = await _context.Zamowienia
-                .Include(z => z.Klient)
-                .FirstOrDefaultAsync(m => m.ZamowienieId == id);
-            if (zamowienie == null)
-            {
-                return NotFound();
-            }
+            var produkt = await _context.Produkty.FindAsync(produktId);
+            if (produkt == null) return NotFound();
 
-            return View(zamowienie);
-        }
+            
+            var email = User.Identity.Name;
+            var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.Email == email);
+            if (klient == null) return RedirectToAction("Create", "Klienci");
 
-        // GET: Zamowienia/Create
-        public IActionResult Create()
-        {
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "KlientId", "Email");
+            ViewBag.Produkt = produkt;
             return View();
         }
 
-        // POST: Zamowienia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ZamowienieId,DataZamowienia,WartoscZamowienia,KlientId")] Zamowienie zamowienie)
+        public async Task<IActionResult> Create(int produktId)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(zamowienie);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "KlientId", "Email", zamowienie.KlientId);
-            return View(zamowienie);
-        }
+            var produkt = await _context.Produkty.FindAsync(produktId);
+            var email = User.Identity.Name;
+            var klient = await _context.Klienci.FirstOrDefaultAsync(k => k.Email == email);
 
-        // GET: Zamowienia/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (produkt == null || klient == null) return NotFound();
 
-            var zamowienie = await _context.Zamowienia.FindAsync(id);
-            if (zamowienie == null)
+            var zamowienie = new Zamowienie
             {
-                return NotFound();
-            }
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "KlientId", "Email", zamowienie.KlientId);
-            return View(zamowienie);
-        }
-
-        // POST: Zamowienia/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ZamowienieId,DataZamowienia,WartoscZamowienia,KlientId")] Zamowienie zamowienie)
-        {
-            if (id != zamowienie.ZamowienieId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                DataZamowienia = DateTime.Now, 
+                KlientId = klient.KlientId,    
+                WartoscZamowienia = produkt.Cena,
+                PozycjaZamowienias = new List<PozycjaZamowienia>
                 {
-                    _context.Update(zamowienie);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ZamowienieExists(zamowienie.ZamowienieId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                    new PozycjaZamowienia {
+                        ProduktId = produkt.ProduktId,
+                        Ilosc = 1,
+                        CenaJednostkowa = produkt.Cena
                     }
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["KlientId"] = new SelectList(_context.Klienci, "KlientId", "Email", zamowienie.KlientId);
-            return View(zamowienie);
-        }
+            };
 
-        // GET: Zamowienia/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var zamowienie = await _context.Zamowienia
-                .Include(z => z.Klient)
-                .FirstOrDefaultAsync(m => m.ZamowienieId == id);
-            if (zamowienie == null)
-            {
-                return NotFound();
-            }
-
-            return View(zamowienie);
-        }
-
-        // POST: Zamowienia/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var zamowienie = await _context.Zamowienia.FindAsync(id);
-            if (zamowienie != null)
-            {
-                _context.Zamowienia.Remove(zamowienie);
-            }
-
+            _context.Add(zamowienie);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ZamowienieExists(int id)
-        {
-            return _context.Zamowienia.Any(e => e.ZamowienieId == id);
         }
     }
 }
